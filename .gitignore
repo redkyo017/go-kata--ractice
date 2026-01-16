@@ -1,0 +1,34 @@
+# Binaries for programs and plugins
+# Use a double star (**) to ignore files in any subdirectory
+**/*.exe
+**/*.exe~
+**/*.dll
+**/*.so
+**/*.dylib
+
+# Test binary, built with `go test -c`
+**/*.test
+
+# Code coverage profiles and other test artifacts
+**/*.out
+coverage.*
+*.coverprofile
+profile.cov
+
+# Dependency directories (only if using vendor directory for dependencies)
+vendor/
+
+# Go workspace file (go.work and go.work.sum are typically ignored)
+go.work
+go.work.sum
+
+# Editor/IDE specific files and directories (common across all projects)
+# .idea/ (for GoLand/IntelliJ)
+# .vscode/ (for VS Code)
+.idea/
+.vscode/
+
+/bin
+/pkg
+
+**/.env
