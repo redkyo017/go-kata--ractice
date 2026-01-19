@@ -1,7 +1,8 @@
 package main
 
 import (
-	repo "ecom-api/internal"
+	repo "ecom-api/internal/adapters/postgresql/sqlc"
+	"ecom-api/internal/orders"
 	"ecom-api/internal/products"
 	"log"
 	"net/http"
@@ -41,7 +42,12 @@ func (app *application) mount() http.Handler {
 	productService := products.NewService(repo.New(app.db))
 	productHandler := products.NewHandler(productService)
 	r.Get("/products", productHandler.ListProducts)
+	r.Get("/products/{id}", productHandler.GetProductByID)
 
+	orderService := orders.NewService(repo.New(app.db), app.db)
+	orderHandler := orders.NewHandler(orderService)
+	r.Post("/orders", orderHandler.PlaceOrder)
+	r.Get("/orders/{id}", orderHandler.GetOrderByID)
 	// http.ListenAndServe(":3333", r)
 	return r
 }

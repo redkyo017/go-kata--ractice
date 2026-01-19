@@ -7,7 +7,93 @@ package repo
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+const createOrder = `-- name: CreateOrder :one
+INSERT INTO orders (
+    customer_id
+) VALUES($1) RETURNING id, customer_id, created_at
+`
+
+func (q *Queries) CreateOrder(ctx context.Context, customerID int64) (Order, error) {
+	row := q.db.QueryRow(ctx, createOrder, customerID)
+	var i Order
+	err := row.Scan(&i.ID, &i.CustomerID, &i.CreatedAt)
+	return i, err
+}
+
+const createOrderItem = `-- name: CreateOrderItem :one
+INSERT INTO order_items (
+    order_id,
+    product_id,
+    quantity,
+    price_cents
+) VALUES($1, $2, $3, $4) RETURNING id, order_id, product_id, quantity, price_cents
+`
+
+type CreateOrderItemParams struct {
+	OrderID    int64 `json:"order_id"`
+	ProductID  int64 `json:"product_id"`
+	Quantity   int32 `json:"quantity"`
+	PriceCents int32 `json:"price_cents"`
+}
+
+func (q *Queries) CreateOrderItem(ctx context.Context, arg CreateOrderItemParams) (OrderItem, error) {
+	row := q.db.QueryRow(ctx, createOrderItem,
+		arg.OrderID,
+		arg.ProductID,
+		arg.Quantity,
+		arg.PriceCents,
+	)
+	var i OrderItem
+	err := row.Scan(
+		&i.ID,
+		&i.OrderID,
+		&i.ProductID,
+		&i.Quantity,
+		&i.PriceCents,
+	)
+	return i, err
+}
+
+const findOrderByID = `-- name: FindOrderByID :one
+SELECT
+orders.id, customer_id, created_at, order_items.id, order_id, product_id, quantity, price_cents
+FROM
+orders
+Join order_items
+on
+orders.id = order_items.order_id and orders.id = $1
+`
+
+type FindOrderByIDRow struct {
+	ID         int64              `json:"id"`
+	CustomerID int64              `json:"customer_id"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+	ID_2       int64              `json:"id_2"`
+	OrderID    int64              `json:"order_id"`
+	ProductID  int64              `json:"product_id"`
+	Quantity   int32              `json:"quantity"`
+	PriceCents int32              `json:"price_cents"`
+}
+
+func (q *Queries) FindOrderByID(ctx context.Context, id int64) (FindOrderByIDRow, error) {
+	row := q.db.QueryRow(ctx, findOrderByID, id)
+	var i FindOrderByIDRow
+	err := row.Scan(
+		&i.ID,
+		&i.CustomerID,
+		&i.CreatedAt,
+		&i.ID_2,
+		&i.OrderID,
+		&i.ProductID,
+		&i.Quantity,
+		&i.PriceCents,
+	)
+	return i, err
+}
 
 const findProductByID = `-- name: FindProductByID :one
 SELECT
