@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"io"
-	"log"
 	"net/http"
 )
 
@@ -65,7 +64,6 @@ func (o *OllamaClient) GenerateResponse(ctx context.Context, prompt string) (str
 	if err := json.Unmarshal(respBody, &ollamaResponse); err != nil {
 		return "", err
 	}
-	log.Printf("con co be be %v", err)
 
 	return ollamaResponse.Response, nil
 }
